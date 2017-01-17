@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">BookListing</string>
     <string name="search">Search</string>
+    <string name="error_message">Error message</string>
 </resources>

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +21,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mResultsTextView;
 
+    TextView mErrorMessage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,15 +33,25 @@ public class MainActivity extends AppCompatActivity {
         mUrlDisplay = (TextView) findViewById(R.id.textView_of_url);
 
         mResultsTextView = (TextView) findViewById(R.id.search_results);
+
+        mErrorMessage = (TextView) findViewById(R.id.tv_error_message_display);
     }
 
     private void makeBookSearchQuery() {
-
         String bookQuery = mSearchEditText.getText().toString();
         URL bookQueryURL = NetworkUtils.buildURL(bookQuery);
         mUrlDisplay.setText(bookQueryURL.toString());
         new BookQueryTask().execute(bookQueryURL);
+    }
 
+    private void showJsonDataView() {
+        mErrorMessage.setVisibility(View.INVISIBLE);
+        mResultsTextView.setVisibility(View.VISIBLE);
+    }
+
+    private void showErrorMessage() {
+        mResultsTextView.setVisibility(View.INVISIBLE);
+        mErrorMessage.setVisibility(View.VISIBLE);
     }
 
     public class BookQueryTask extends AsyncTask<URL, Void, String> {
@@ -50,26 +63,23 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(URL... urls) {
-
             URL searchUrl = urls[0];
-
             String bookSearchResults = null;
-
             try {
                 bookSearchResults = NetworkUtils.getResponseFromHttpUrl(searchUrl);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
             return bookSearchResults;
         }
 
         @Override
         protected void onPostExecute(String bookSearchResults) {
             if (bookSearchResults != null && !bookSearchResults.equals("")) {
-                //showJsonDataView();
+                showJsonDataView();
                 mResultsTextView.setText(bookSearchResults);
             } else {
+                showErrorMessage();
 
             }
         }
