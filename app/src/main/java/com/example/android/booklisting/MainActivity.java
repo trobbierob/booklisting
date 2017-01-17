@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private void makeBookSearchQuery() {
 
         String bookQuery = mSearchEditText.getText().toString();
-        URL bookQueryURL = Network.buildURL(bookQuery);
+        URL bookQueryURL = NetworkUtils.buildURL(bookQuery);
         mUrlDisplay.setText(bookQueryURL.toString());
         new BookQueryTask().execute(bookQueryURL);
 
@@ -50,10 +50,13 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(URL... urls) {
+
             URL searchUrl = urls[0];
+
             String bookSearchResults = null;
+
             try {
-                bookSearchResults = Network.getResponseFromHttpUrl(searchUrl);
+                bookSearchResults = NetworkUtils.getResponseFromHttpUrl(searchUrl);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -70,13 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
-
     }
-
-
-
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

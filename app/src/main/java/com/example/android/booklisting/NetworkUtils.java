@@ -13,7 +13,7 @@ import java.util.Scanner;
  * Created by Sogekingu on 1/15/17.
  */
 
-public class Network {
+public class NetworkUtils {
 
     final static String GOOGLE_BOOKS_URL =
             "https://www.googleapis.com/books/v1/volumes";
