@@ -7,11 +7,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
 
     TextView mErrorMessage;
 
+    private ListView listView;
+    ArrayList<HashMap<String, String>> bookList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,11 +42,13 @@ public class MainActivity extends AppCompatActivity {
 
         mSearchEditText = (EditText) findViewById(R.id.editText_query);
 
-        mUrlDisplay = (TextView) findViewById(R.id.textView_of_url);
+        bookList = new ArrayList<>();
+        listView = (ListView) findViewById(R.id.list);
 
-        mResultsTextView = (TextView) findViewById(R.id.search_results);
-
-        mErrorMessage = (TextView) findViewById(R.id.tv_error_message_display);
+        //these values were removed once we changed the main layout to a ListView
+        //mUrlDisplay = (TextView) findViewById(R.id.textView_of_url);
+        //mResultsTextView = (TextView) findViewById(R.id.search_results);
+        //mErrorMessage = (TextView) findViewById(R.id.tv_error_message_display);
     }
 
     private void makeBookSearchQuery() {
@@ -54,6 +68,50 @@ public class MainActivity extends AppCompatActivity {
         mErrorMessage.setVisibility(View.VISIBLE);
     }
 
+
+
+
+    public class BookQueryTask extends AsyncTask<String, Void, String[]> {
+
+        @Override
+        protected String[] doInBackground(String... urls) {
+
+            if (urls.length == 0) {
+                return null;
+            }
+
+            String location = urls[0];
+
+            URL bookRequestUrl = NetworkUtils.buildURL(location);
+
+            try {
+                String jsonBookResponse = NetworkUtils
+                        .getResponseFromHttpUrl(bookRequestUrl);
+
+                String[] simpleJsonBookData = BookJsonUtils
+                        .getStringsFromJson(MainActivity.this, jsonBookResponse);
+
+                return simpleJsonBookData;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        // COMPLETED (7) Override the onPostExecute method to display the results of the network request
+        @Override
+        protected void onPostExecute(String[] bookData) {
+            if (bookData != null) {
+
+                for (String bookString : bookData) {
+                    mResultsTextView.append((bookString) + "\n\n\n");
+                }
+            }
+        }
+    }
+
+    /*
     public class BookQueryTask extends AsyncTask<URL, Void, String> {
 
         @Override
@@ -63,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(URL... urls) {
+
             URL searchUrl = urls[0];
             String bookSearchResults = null;
             try {
@@ -84,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
