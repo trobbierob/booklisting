@@ -3,6 +3,7 @@ package com.example.android.booklisting;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,15 +15,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     private EditText mSearchEditText;
 
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         listView = (ListView) findViewById(R.id.list);
 
         //these values were removed once we changed the main layout to a ListView
-        //mUrlDisplay = (TextView) findViewById(R.id.textView_of_url);
+        mUrlDisplay = (TextView) findViewById(R.id.textView_of_url);
         //mResultsTextView = (TextView) findViewById(R.id.search_results);
         //mErrorMessage = (TextView) findViewById(R.id.tv_error_message_display);
     }
@@ -55,96 +56,8 @@ public class MainActivity extends AppCompatActivity {
         String bookQuery = mSearchEditText.getText().toString();
         URL bookQueryURL = NetworkUtils.buildURL(bookQuery);
         mUrlDisplay.setText(bookQueryURL.toString());
-        new BookQueryTask().execute(bookQueryURL);
+        new BookQueryTask().execute(bookQuery);
     }
-
-    private void showJsonDataView() {
-        mErrorMessage.setVisibility(View.INVISIBLE);
-        mResultsTextView.setVisibility(View.VISIBLE);
-    }
-
-    private void showErrorMessage() {
-        mResultsTextView.setVisibility(View.INVISIBLE);
-        mErrorMessage.setVisibility(View.VISIBLE);
-    }
-
-
-
-
-    public class BookQueryTask extends AsyncTask<String, Void, String[]> {
-
-        @Override
-        protected String[] doInBackground(String... urls) {
-
-            if (urls.length == 0) {
-                return null;
-            }
-
-            String location = urls[0];
-
-            URL bookRequestUrl = NetworkUtils.buildURL(location);
-
-            try {
-                String jsonBookResponse = NetworkUtils
-                        .getResponseFromHttpUrl(bookRequestUrl);
-
-                String[] simpleJsonBookData = BookJsonUtils
-                        .getStringsFromJson(MainActivity.this, jsonBookResponse);
-
-                return simpleJsonBookData;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        // COMPLETED (7) Override the onPostExecute method to display the results of the network request
-        @Override
-        protected void onPostExecute(String[] bookData) {
-            if (bookData != null) {
-
-                for (String bookString : bookData) {
-                    mResultsTextView.append((bookString) + "\n\n\n");
-                }
-            }
-        }
-    }
-
-    /*
-    public class BookQueryTask extends AsyncTask<URL, Void, String> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(URL... urls) {
-
-            URL searchUrl = urls[0];
-            String bookSearchResults = null;
-            try {
-                bookSearchResults = NetworkUtils.getResponseFromHttpUrl(searchUrl);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return bookSearchResults;
-        }
-
-        @Override
-        protected void onPostExecute(String bookSearchResults) {
-            if (bookSearchResults != null && !bookSearchResults.equals("")) {
-                showJsonDataView();
-                mResultsTextView.setText(bookSearchResults);
-            } else {
-                showErrorMessage();
-
-            }
-        }
-    }
-
-    */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -161,4 +74,68 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public class BookQueryTask extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... urls) {
+
+            if (urls.length == 0) {
+                //return null;
+            }
+
+            String bookQueryString = urls[0];
+
+            URL bookRequestUrl = NetworkUtils.buildURL(bookQueryString);
+
+            try {
+                String jsonBookResponse = NetworkUtils
+                        .getResponseFromHttpUrl(bookRequestUrl);
+
+                JSONObject rootUrl = new JSONObject(jsonBookResponse);
+                JSONArray itemsArray = rootUrl.getJSONArray("items");
+
+                Log.v(TAG, "jsonBookResponse is " + jsonBookResponse);
+
+                for (int i = 0; i < itemsArray.length(); i++) {
+
+                    JSONObject volumeInfo = itemsArray.getJSONObject(4);
+                    String title = volumeInfo.getString("title");
+
+                    HashMap<String, String> book = new HashMap<>();
+
+                    book.put("title", title);
+
+                    bookList.add(book);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                //return null;
+            }
+            return null;
+        }
+
+        // COMPLETED (7) Override the onPostExecute method to display the results of the network request
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+
+            ListAdapter adapter = new SimpleAdapter(MainActivity.this, bookList,
+                    R.layout.list_item, new String[]{"title"},
+                    new int[]{R.id.title});
+            listView.setAdapter(adapter);
+        }
+    }
+
+    private void showJsonDataView() {
+        mErrorMessage.setVisibility(View.INVISIBLE);
+        mResultsTextView.setVisibility(View.VISIBLE);
+    }
+
+    private void showErrorMessage() {
+        mResultsTextView.setVisibility(View.INVISIBLE);
+        mErrorMessage.setVisibility(View.VISIBLE);
+    }
+
 }
