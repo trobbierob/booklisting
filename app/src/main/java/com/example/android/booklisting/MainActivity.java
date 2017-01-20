@@ -14,6 +14,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -104,8 +105,65 @@ public class MainActivity extends AppCompatActivity {
                     jsonString = NetworkUtils.getResponseFromHttpUrl(bookQueryUrl);
                     Log.v(TAG, "jsonString is: " + jsonString);
 
-                    JSONObject jsonObject = new JSONObject(jsonString);
-                    Log.v(TAG, "jsonObject is " + jsonObject);
+                    JSONObject jsonBookRootObject = new JSONObject(jsonString);
+                    Log.v(TAG, "jsonObject is " + jsonBookRootObject);
+
+                    JSONArray itemsArray = jsonBookRootObject.optJSONArray("items");
+                    Log.v(TAG, "itemsArray is: " + itemsArray);
+
+                    //JSONObject volumeInfo = itemsArray.getJSONObject("volumeInfo");
+
+
+                    for (int i = 0; i < itemsArray.length(); i++) {
+
+                        JSONObject jsonObject = itemsArray.getJSONObject(i);
+
+                        String kind = jsonObject.optString("kind").toString();
+                        Log.v(TAG, "kind is: " + kind);
+
+                        String id = jsonObject.optString("id").toString();
+                        Log.v(TAG, "id is: " + id);
+
+                        String etag = jsonObject.optString("etag").toString();
+                        Log.v(TAG, "etag is: " + etag);
+
+                        String selfLink = jsonObject.optString("selfLink").toString();
+                        Log.v(TAG, "selfLink is: " + selfLink);
+
+                        String volumeInfo = jsonObject.optString("volumeInfo").toString();
+                        Log.v(TAG, "volumeInfo is: " + volumeInfo);
+
+                        HashMap<String, String> book = new HashMap<>();
+                        book.put("id", id);
+
+                        bookList.add(book);
+
+                        /*
+                        JSONObject volumeInfo = itemsArray.getJSONObject(4);
+
+                        String title = volumeInfo.optString("title").toString();
+                        Log.v(TAG, "title is: " + title);
+
+                        HashMap<String, String> book = new HashMap<>();
+
+                        book.put("title", title);
+
+                        bookList.add(book);
+                        */
+
+                    }
+
+                    //Log.v(TAG, "this is a string " + itemsArray);
+                    //JSONObject kind = jsonObject.getJSONObject("totalItems");
+                    //JSONObject kind = jsonObject.getJSONArray("items");
+
+                    //for (int i = 0; i < itemsArray.length(); i++) {
+
+                    //}
+
+                    //JSONArray itemsArray = jsonObject.getJSONArray("items");
+                    //Log.v(TAG, "itemsArray is " + itemsArray);
+
                 } catch (IOException e) {
 
                 } catch (JSONException e) {
@@ -113,9 +171,9 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             } else {
+                Log.e(TAG, "Could not get json from server.");
 
             }
-
 
             /*
             if (urls.length == 0) {
@@ -128,7 +186,6 @@ public class MainActivity extends AppCompatActivity {
 
 
             try {
-
 
                 String jsonBookResponse = NetworkUtils
                         .getResponseFromHttpUrl(bookRequestUrl);
@@ -197,8 +254,8 @@ public class MainActivity extends AppCompatActivity {
             super.onPostExecute(result);
 
             ListAdapter adapter = new SimpleAdapter(MainActivity.this, bookList,
-                    R.layout.list_item, new String[]{"title"},
-                    new int[]{R.id.title});
+                    R.layout.list_item, new String[]{"id", "authors"},
+                    new int[]{R.id.id, R.id.authors});
             listView.setAdapter(adapter);
         }
     }
