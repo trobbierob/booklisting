@@ -19,13 +19,6 @@
         android:paddingBottom="16dp"
         android:textSize="25dp" />
 
-    <TextView
-        android:id="@+id/textView_of_url"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="This is the url"
-        android:textSize="22sp" />
-
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"

@@ -50,24 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         bookList = new ArrayList<>();
         listView = (ListView) findViewById(R.id.list);
-
-        //these values were removed once we changed the main layout to a ListView
-        mUrlDisplay = (TextView) findViewById(R.id.textView_of_url);
-        //mResultsTextView = (TextView) findViewById(R.id.search_results);
-        //mErrorMessage = (TextView) findViewById(R.id.tv_error_message_display);
     }
-
-    //private void makeBookSearchQuery() {
-        //String bookQuery = mSearchEditText.getText().toString();
-        //URL bookQueryURL = NetworkUtils.buildURL(bookQuery);
-        //try{
-            //jsonString = NetworkUtils.getResponseFromHttpUrl(bookQueryURL);
-        //}  catch (IOException e) {
-
-        //}
-        //mUrlDisplay.setText(bookQueryURL.toString());
-        //new BookQueryTask().execute(jsonString);
-    //}
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -80,18 +63,16 @@ public class MainActivity extends AppCompatActivity {
         int menuItemSelected = item.getItemId();
         if (menuItemSelected == R.id.action_bar_search) {
             new BookQueryTask().execute();
-            //makeBookSearchQuery();
             Toast.makeText(getBaseContext(), "Search was clicked", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public class BookQueryTask extends AsyncTask<Void, Void, Void>{
+    public class BookQueryTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {
             String bookQuery = mSearchEditText.getText().toString();
-            //URL bookQueryURL = NetworkUtils.buildURL(bookQuery);
             bookQueryUrl = NetworkUtils.buildURL(bookQuery);
         }
 
@@ -111,58 +92,27 @@ public class MainActivity extends AppCompatActivity {
                     JSONArray itemsArray = jsonBookRootObject.optJSONArray("items");
                     Log.v(TAG, "itemsArray is: " + itemsArray);
 
-                    //JSONObject volumeInfo = itemsArray.getJSONObject("volumeInfo");
-
-
                     for (int i = 0; i < itemsArray.length(); i++) {
 
                         JSONObject jsonObject = itemsArray.getJSONObject(i);
 
-                        String kind = jsonObject.optString("kind").toString();
-                        Log.v(TAG, "kind is: " + kind);
-
-                        String id = jsonObject.optString("id").toString();
-                        Log.v(TAG, "id is: " + id);
-
-                        String etag = jsonObject.optString("etag").toString();
-                        Log.v(TAG, "etag is: " + etag);
-
-                        String selfLink = jsonObject.optString("selfLink").toString();
-                        Log.v(TAG, "selfLink is: " + selfLink);
-
-                        String volumeInfo = jsonObject.optString("volumeInfo").toString();
+                        JSONObject volumeInfo = jsonObject.getJSONObject("volumeInfo");
                         Log.v(TAG, "volumeInfo is: " + volumeInfo);
-
-                        HashMap<String, String> book = new HashMap<>();
-                        book.put("id", id);
-
-                        bookList.add(book);
-
-                        /*
-                        JSONObject volumeInfo = itemsArray.getJSONObject(4);
 
                         String title = volumeInfo.optString("title").toString();
                         Log.v(TAG, "title is: " + title);
 
-                        HashMap<String, String> book = new HashMap<>();
+                        String authorString = volumeInfo.optString("authors").toString();
+                        Log.v(TAG, "authorsString is: " + authorString);
 
+                        JSONArray authorsArray = volumeInfo.getJSONArray("authors");
+                        Log.v(TAG, "authorsArray is: " + authorsArray);
+
+                        HashMap<String, String> book = new HashMap<>();
                         book.put("title", title);
 
                         bookList.add(book);
-                        */
-
                     }
-
-                    //Log.v(TAG, "this is a string " + itemsArray);
-                    //JSONObject kind = jsonObject.getJSONObject("totalItems");
-                    //JSONObject kind = jsonObject.getJSONArray("items");
-
-                    //for (int i = 0; i < itemsArray.length(); i++) {
-
-                    //}
-
-                    //JSONArray itemsArray = jsonObject.getJSONArray("items");
-                    //Log.v(TAG, "itemsArray is " + itemsArray);
 
                 } catch (IOException e) {
 
@@ -172,90 +122,16 @@ public class MainActivity extends AppCompatActivity {
 
             } else {
                 Log.e(TAG, "Could not get json from server.");
-
             }
-
-            /*
-            if (urls.length == 0) {
-                //return null;
-            }
-
-            String bookQueryString = urls[0];
-
-            URL bookRequestUrl = NetworkUtils.buildURL(bookQueryString);
-
-
-            try {
-
-                String jsonBookResponse = NetworkUtils
-                        .getResponseFromHttpUrl(bookRequestUrl);
-                Log.v(TAG, "jsonBoookReponse is " + jsonBookResponse);
-
-                JSONObject root = new JSONObject(jsonBookResponse);
-                Log.v(TAG, "rootUrl is " + root);
-
-                JSONObject kind = root.getJSONObject("volumeInfo");
-                Log.v(TAG, "kind is " + kind);
-
-                JSONArray itemsArray = root.getJSONArray("items");
-                Log.v(TAG, "itemsArray is " + itemsArray);
-
-                */
-                /*
-
-                String jsonBookResponse = NetworkUtils
-                        .getResponseFromHttpUrl(bookRequestUrl);
-
-                Log.v(TAG, "jsonBoookReponse is " + jsonBookResponse);
-
-                JSONObject rootUrl = new JSONObject(jsonBookResponse);
-
-                Log.v(TAG, "rootUrl is " + rootUrl);
-
-                JSONArray itemsArray = rootUrl.getJSONArray("items");
-
-                Log.v(TAG, "itemsArray is " + itemsArray);
-
-                 */
-
-                /*
-                for (int i = 0; i < itemsArray.length(); i++) {
-
-                    JSONObject volumeInfo = itemsArray.getJSONObject(4);
-
-                    Log.v(TAG, "volumeInfo is " + volumeInfo);
-
-                    String title = volumeInfo.getString("title");
-
-                    Log.v(TAG, "title is " + title);
-
-                    HashMap<String, String> book = new HashMap<>();
-
-                    book.put("title", title);
-
-                    bookList.add(book);
-                }
-                */
-
-            //} catch (final JSONException e) {
-                //e.printStackTrace();
-                //return null;
-            //} catch (IOException e) {
-                //e.printStackTrace();
-                //return null;
-            //}
-
             return null;
         }
 
-        // COMPLETED (7) Override the onPostExecute method to display the results of the network request
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-
             ListAdapter adapter = new SimpleAdapter(MainActivity.this, bookList,
-                    R.layout.list_item, new String[]{"id", "authors"},
-                    new int[]{R.id.id, R.id.authors});
+                    R.layout.list_item, new String[]{"title"},
+                    new int[]{R.id.title});
             listView.setAdapter(adapter);
         }
     }
