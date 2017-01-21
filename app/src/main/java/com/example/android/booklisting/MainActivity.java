@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mResultsTextView;
 
+    private String test = "";
+
     TextView mErrorMessage;
 
     public String jsonString;
@@ -108,8 +110,26 @@ public class MainActivity extends AppCompatActivity {
                         JSONArray authorsArray = volumeInfo.getJSONArray("authors");
                         Log.v(TAG, "authorsArray is: " + authorsArray);
 
+                        //String test;
+
+                        for (int j = 0; j < authorsArray.length(); j++) {
+                            String authorNameName = authorsArray.getString(j);
+                            Log.v(TAG, "authorNameName is: " + authorNameName);
+
+                            test = test.concat(authorNameName + "   ");
+
+
+                        }
+
+                        Log.v(TAG, "test is: " + test);
+
+
+
                         HashMap<String, String> book = new HashMap<>();
                         book.put("title", title);
+
+                        book.put("authors", test);
+                        test = "";
 
                         bookList.add(book);
                     }
@@ -130,9 +150,11 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
             ListAdapter adapter = new SimpleAdapter(MainActivity.this, bookList,
-                    R.layout.list_item, new String[]{"title"},
-                    new int[]{R.id.title});
+                    R.layout.list_item, new String[]{"title", "authors"},
+                    new int[]{R.id.title, R.id.authors});
+            listView.setAdapter(null);
             listView.setAdapter(adapter);
+
         }
     }
 

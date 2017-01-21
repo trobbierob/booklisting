@@ -9,6 +9,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/colorPrimary"
+        android:padding="16dp"
         android:textSize="22sp" />
+
+    <TextView
+        android:id="@+id/authors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorPrimary"
+        android:padding="16dp"
+        android:textSize="12sp" />
 
 </LinearLayout>
