@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mResultsTextView;
 
-    private String test = "";
+    private String authors = "";
 
     TextView mErrorMessage;
 
@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     public URL bookQueryUrl;
 
     private ListView listView;
-    ArrayList<HashMap<String, String>> bookList;
+    private ArrayList<HashMap<String, String>> bookList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int menuItemSelected = item.getItemId();
         if (menuItemSelected == R.id.action_bar_search) {
+            bookList.clear();
             new BookQueryTask().execute();
             Toast.makeText(getBaseContext(), "Search was clicked", Toast.LENGTH_SHORT).show();
         }
@@ -81,63 +82,40 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... urls) {
 
-            Log.v(TAG, "bookQueryUrl is: " + bookQueryUrl);
-
             if (bookQueryUrl != null) {
                 try {
                     jsonString = NetworkUtils.getResponseFromHttpUrl(bookQueryUrl);
-                    Log.v(TAG, "jsonString is: " + jsonString);
-
                     JSONObject jsonBookRootObject = new JSONObject(jsonString);
-                    Log.v(TAG, "jsonObject is " + jsonBookRootObject);
-
                     JSONArray itemsArray = jsonBookRootObject.optJSONArray("items");
-                    Log.v(TAG, "itemsArray is: " + itemsArray);
 
                     for (int i = 0; i < itemsArray.length(); i++) {
-
                         JSONObject jsonObject = itemsArray.getJSONObject(i);
-
                         JSONObject volumeInfo = jsonObject.getJSONObject("volumeInfo");
-                        Log.v(TAG, "volumeInfo is: " + volumeInfo);
-
                         String title = volumeInfo.optString("title").toString();
-                        Log.v(TAG, "title is: " + title);
-
-                        String authorString = volumeInfo.optString("authors").toString();
-                        Log.v(TAG, "authorsString is: " + authorString);
-
                         JSONArray authorsArray = volumeInfo.getJSONArray("authors");
-                        Log.v(TAG, "authorsArray is: " + authorsArray);
-
-                        //String test;
+                        String description = volumeInfo.optString("description").toString();
 
                         for (int j = 0; j < authorsArray.length(); j++) {
-                            String authorNameName = authorsArray.getString(j);
-                            Log.v(TAG, "authorNameName is: " + authorNameName);
-
-                            test = test.concat(authorNameName + "   ");
-
-
+                            String authorsNames = authorsArray.getString(j);
+                            authors = authors.concat(authorsNames + "   ");
                         }
-
-                        Log.v(TAG, "test is: " + test);
-
-
 
                         HashMap<String, String> book = new HashMap<>();
                         book.put("title", title);
-
-                        book.put("authors", test);
-                        test = "";
-
+                        book.put("description", description);
+                        book.put("authors", authors);
                         bookList.add(book);
+                        /*
+                            @param authors is assigned an empty String so that the previous
+                            book's author names do not concatenate into the next book
+                         */
+                        authors = "";
                     }
 
                 } catch (IOException e) {
-
+                    Log.e(TAG, "IOException at " + e);
                 } catch (JSONException e) {
-
+                    Log.e(TAG, "JSONException at " + e);
                 }
 
             } else {
@@ -150,11 +128,9 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
             ListAdapter adapter = new SimpleAdapter(MainActivity.this, bookList,
-                    R.layout.list_item, new String[]{"title", "authors"},
-                    new int[]{R.id.title, R.id.authors});
-            listView.setAdapter(null);
+                    R.layout.list_item, new String[]{"title", "description", "authors"},
+                    new int[]{R.id.title, R.id.description, R.id.authors});
             listView.setAdapter(adapter);
-
         }
     }
 
@@ -167,5 +143,4 @@ public class MainActivity extends AppCompatActivity {
         mResultsTextView.setVisibility(View.INVISIBLE);
         mErrorMessage.setVisibility(View.VISIBLE);
     }
-
 }
