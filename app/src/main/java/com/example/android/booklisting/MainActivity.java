@@ -36,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar mLoadingIndicator;
     private String authors = "";
     private TextView mErrorMessage;
+    private String title;
+    private String description;
+    private JSONArray authorsArray;
     public String jsonString;
     public URL bookQueryUrl;
     private ListView listView;
@@ -70,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
             if (activeNetwork != null) { // connected to the internet
                 bookList.clear();
                 new BookQueryTask().execute();
-                Toast.makeText(getBaseContext(), "Search was clicked", Toast.LENGTH_SHORT).show();
             } else { // not connected to the internet
                 Toast.makeText(getBaseContext(), "Check Internet Connection", Toast.LENGTH_SHORT).show();
             }
@@ -99,13 +101,27 @@ public class MainActivity extends AppCompatActivity {
                     for (int i = 0; i < itemsArray.length(); i++) {
                         JSONObject jsonObject = itemsArray.getJSONObject(i);
                         JSONObject volumeInfo = jsonObject.getJSONObject("volumeInfo");
-                        String title = volumeInfo.optString("title").toString();
-                        JSONArray authorsArray = volumeInfo.getJSONArray("authors");
-                        String description = volumeInfo.optString("description").toString();
 
-                        for (int j = 0; j < authorsArray.length(); j++) {
-                            String authorsNames = authorsArray.getString(j);
-                            authors = authors.concat(authorsNames + "   ");
+                        if (volumeInfo.has("title")) {
+                            title = volumeInfo.optString("title").toString();
+                        } else {
+                            title = "No Title Available";
+                        }
+
+                        if (volumeInfo.has("authors")) {
+                            authorsArray = volumeInfo.getJSONArray("authors");
+                            for (int j = 0; j < authorsArray.length(); j++) {
+                                String authorsNames = authorsArray.getString(j);
+                                authors = authors.concat(authorsNames + "   ");
+                            }
+                        } else {
+                            authors = "No Authors Found";
+                        }
+
+                        if (volumeInfo.has("description")) {
+                            description = volumeInfo.optString("description").toString();
+                        } else {
+                            description = "No Description Available";
                         }
 
                         HashMap<String, String> book = new HashMap<>();
