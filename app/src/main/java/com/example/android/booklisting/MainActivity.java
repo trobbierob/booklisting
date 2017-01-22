@@ -1,5 +1,8 @@
 package com.example.android.booklisting;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +13,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,20 +30,14 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-
     private EditText mSearchEditText;
-
     private TextView mUrlDisplay;
-
     private TextView mResultsTextView;
-
+    private ProgressBar mLoadingIndicator;
     private String authors = "";
-
-    TextView mErrorMessage;
-
+    private TextView mErrorMessage;
     public String jsonString;
     public URL bookQueryUrl;
-
     private ListView listView;
     private ArrayList<HashMap<String, String>> bookList;
 
@@ -48,8 +46,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mSearchEditText = (EditText) findViewById(R.id.editText_query);
+        mErrorMessage = (TextView) findViewById(R.id.error_message);
+        mLoadingIndicator = (ProgressBar) findViewById(R.id.progress_bar);
 
+        mSearchEditText = (EditText) findViewById(R.id.editText_query);
         bookList = new ArrayList<>();
         listView = (ListView) findViewById(R.id.list);
     }
@@ -62,11 +62,18 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         int menuItemSelected = item.getItemId();
         if (menuItemSelected == R.id.action_bar_search) {
-            bookList.clear();
-            new BookQueryTask().execute();
-            Toast.makeText(getBaseContext(), "Search was clicked", Toast.LENGTH_SHORT).show();
+            ConnectivityManager cm = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            if (activeNetwork != null) { // connected to the internet
+                bookList.clear();
+                new BookQueryTask().execute();
+                Toast.makeText(getBaseContext(), "Search was clicked", Toast.LENGTH_SHORT).show();
+            } else { // not connected to the internet
+                Toast.makeText(getBaseContext(), "Check Internet Connection", Toast.LENGTH_SHORT).show();
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -75,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
+            mLoadingIndicator.setVisibility(View.VISIBLE);
             String bookQuery = mSearchEditText.getText().toString();
             bookQueryUrl = NetworkUtils.buildURL(bookQuery);
         }
@@ -126,11 +134,19 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            ListAdapter adapter = new SimpleAdapter(MainActivity.this, bookList,
-                    R.layout.list_item, new String[]{"title", "description", "authors"},
-                    new int[]{R.id.title, R.id.description, R.id.authors});
-            listView.setAdapter(adapter);
+
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+
+            if (bookList != null) {
+
+                ListAdapter adapter = new SimpleAdapter(MainActivity.this, bookList,
+                        R.layout.list_item, new String[]{"title", "description", "authors"},
+                        new int[]{R.id.title, R.id.description, R.id.authors});
+                listView.setAdapter(adapter);
+
+            } else {
+                showErrorMessage();
+            }
         }
     }
 
