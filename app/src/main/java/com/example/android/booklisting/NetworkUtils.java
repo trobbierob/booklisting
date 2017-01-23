@@ -21,7 +21,7 @@ public class NetworkUtils {
 
     final static String PARAM_RESULTS = "maxResults";
 
-    final static String PARAM_RESULT_NUM = "3";
+    final static String PARAM_RESULT_NUM = "5";
 
     public static URL buildURL(String bookSearchQuery) {
         Uri builtUri = Uri.parse(GOOGLE_BOOKS_URL).buildUpon()

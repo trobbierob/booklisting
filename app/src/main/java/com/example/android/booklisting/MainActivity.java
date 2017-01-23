@@ -15,7 +15,6 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -31,11 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private EditText mSearchEditText;
-    private TextView mUrlDisplay;
-    private TextView mResultsTextView;
     private ProgressBar mLoadingIndicator;
     private String authors = "";
-    private TextView mErrorMessage;
     private String title;
     private String description;
     private JSONArray authorsArray;
@@ -49,9 +45,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mErrorMessage = (TextView) findViewById(R.id.error_message);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.progress_bar);
-
         mSearchEditText = (EditText) findViewById(R.id.editText_query);
         bookList = new ArrayList<>();
         listView = (ListView) findViewById(R.id.list);
@@ -65,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         int menuItemSelected = item.getItemId();
         if (menuItemSelected == R.id.action_bar_search) {
             ConnectivityManager cm = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -91,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... urls) {
-
             if (bookQueryUrl != null) {
                 try {
                     jsonString = NetworkUtils.getResponseFromHttpUrl(bookQueryUrl);
@@ -125,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         HashMap<String, String> book = new HashMap<>();
+
                         book.put("title", title);
                         book.put("description", description);
                         book.put("authors", authors);
@@ -150,29 +143,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void result) {
-
             mLoadingIndicator.setVisibility(View.INVISIBLE);
-
             if (bookList != null) {
-
                 ListAdapter adapter = new SimpleAdapter(MainActivity.this, bookList,
                         R.layout.list_item, new String[]{"title", "description", "authors"},
                         new int[]{R.id.title, R.id.description, R.id.authors});
                 listView.setAdapter(adapter);
-
             } else {
-                showErrorMessage();
+                listView.setEmptyView(findViewById(R.id.empty));
             }
         }
-    }
-
-    private void showJsonDataView() {
-        mErrorMessage.setVisibility(View.INVISIBLE);
-        mResultsTextView.setVisibility(View.VISIBLE);
-    }
-
-    private void showErrorMessage() {
-        mResultsTextView.setVisibility(View.INVISIBLE);
-        mErrorMessage.setVisibility(View.VISIBLE);
     }
 }

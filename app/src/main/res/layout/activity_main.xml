@@ -15,7 +15,7 @@
         android:id="@+id/editText_query"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter a word or phrase."
+        android:hint="@string/editText_text"
         android:paddingBottom="16dp"
         android:textSize="25dp" />
 
@@ -23,18 +23,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <TextView
+            android:id="@+id/empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your search turned up no results. Please try another keyword."
+            android:layout_gravity="center_horizontal"
+            android:textSize="22sp"
+            android:visibility="gone"/>
+
         <ListView
             android:id="@+id/list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"></ListView>
-
-        <TextView
-            android:id="@+id/error_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/error_message"
-            android:visibility="invisible"
-            android:textSize="20sp"/>
+            android:layout_height="wrap_content"/>
 
         <ProgressBar
             android:layout_width="42dp"
