@@ -3,4 +3,15 @@
     <string name="search">Search</string>
     <string name="error_message">Error message</string>
     <string name="editText_text">Enter a word or phrase.</string>
+    <string name="no_title_available">No Title Available</string>
+    <string name="no_authors_available">No Authors Found</string>
+    <string name="no_descrip_available">No Description Available</string>
+    <string name="json_server_error">Could not get json from server.</string>
+    <string name="check_connection">Check Internet Connection</string>
+    <string name="items">items</string>
+    <string name="volume_info">volumeInfo</string>
+    <string name="title">title</string>
+    <string name="authors">authors</string>
+    <string name="description">description</string>
+    <string name="test">description</string>
 </resources>

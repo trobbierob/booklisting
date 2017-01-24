@@ -15,6 +15,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private String title;
     private String description;
     private JSONArray authorsArray;
+    private TextView mEmptyView;
     public String jsonString;
     public URL bookQueryUrl;
     private ListView listView;
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         mLoadingIndicator = (ProgressBar) findViewById(R.id.progress_bar);
         mSearchEditText = (EditText) findViewById(R.id.editText_query);
         bookList = new ArrayList<>();
+        mEmptyView = (TextView) findViewById(R.id.empty);
         listView = (ListView) findViewById(R.id.list);
     }
 
@@ -61,13 +64,15 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int menuItemSelected = item.getItemId();
         if (menuItemSelected == R.id.action_bar_search) {
-            ConnectivityManager cm = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+            ConnectivityManager cm = (ConnectivityManager)
+                    MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
             if (activeNetwork != null) { // connected to the internet
                 bookList.clear();
                 new BookQueryTask().execute();
             } else { // not connected to the internet
-                Toast.makeText(getBaseContext(), "Check Internet Connection", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), R.string.check_connection,
+                        Toast.LENGTH_SHORT).show();
             }
         }
         return super.onOptionsItemSelected(item);
@@ -79,7 +84,16 @@ public class MainActivity extends AppCompatActivity {
         protected void onPreExecute() {
             mLoadingIndicator.setVisibility(View.VISIBLE);
             String bookQuery = mSearchEditText.getText().toString();
-            bookQueryUrl = NetworkUtils.buildURL(bookQuery);
+
+            if (bookQuery.equals(null) || bookQuery.equals("")){
+                mEmptyView.setVisibility(View.VISIBLE);
+                listView.setVisibility(View.INVISIBLE);
+
+            } else {
+                mEmptyView.setVisibility(View.INVISIBLE);
+                listView.setVisibility(View.VISIBLE);
+                bookQueryUrl = NetworkUtils.buildURL(bookQuery);
+            }
         }
 
         @Override
@@ -88,39 +102,39 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     jsonString = NetworkUtils.getResponseFromHttpUrl(bookQueryUrl);
                     JSONObject jsonBookRootObject = new JSONObject(jsonString);
-                    JSONArray itemsArray = jsonBookRootObject.optJSONArray("items");
+                    JSONArray itemsArray = jsonBookRootObject.optJSONArray(getString(R.string.items));
 
                     for (int i = 0; i < itemsArray.length(); i++) {
                         JSONObject jsonObject = itemsArray.getJSONObject(i);
-                        JSONObject volumeInfo = jsonObject.getJSONObject("volumeInfo");
+                        JSONObject volumeInfo = jsonObject.getJSONObject(getString(R.string.volume_info));
 
-                        if (volumeInfo.has("title")) {
-                            title = volumeInfo.optString("title").toString();
+                        if (volumeInfo.has(getString(R.string.title))) {
+                            title = volumeInfo.optString(getString(R.string.title));
                         } else {
-                            title = "No Title Available";
+                            title = getString(R.string.no_title_available);
                         }
 
-                        if (volumeInfo.has("authors")) {
-                            authorsArray = volumeInfo.getJSONArray("authors");
+                        if (volumeInfo.has(getString(R.string.authors))) {
+                            authorsArray = volumeInfo.getJSONArray(getString(R.string.authors));
                             for (int j = 0; j < authorsArray.length(); j++) {
                                 String authorsNames = authorsArray.getString(j);
                                 authors = authors.concat(authorsNames + "   ");
                             }
                         } else {
-                            authors = "No Authors Found";
+                            authors = getString(R.string.no_authors_available);
                         }
 
-                        if (volumeInfo.has("description")) {
-                            description = volumeInfo.optString("description").toString();
+                        if (volumeInfo.has(getString(R.string.description))) {
+                            description = volumeInfo.optString(getString(R.string.description));
                         } else {
-                            description = "No Description Available";
+                            description = getString(R.string.no_descrip_available);
                         }
 
                         HashMap<String, String> book = new HashMap<>();
 
-                        book.put("title", title);
-                        book.put("description", description);
-                        book.put("authors", authors);
+                        book.put(getString(R.string.title), title);
+                        book.put(getString(R.string.description), description);
+                        book.put(getString(R.string.authors), authors);
                         bookList.add(book);
                         /*
                             @param authors is assigned an empty String so that the previous
@@ -136,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             } else {
-                Log.e(TAG, "Could not get json from server.");
+                Log.e(TAG, getString(R.string.json_server_error));
             }
             return null;
         }
@@ -144,9 +158,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void result) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (bookList != null) {
+            if (!bookList.equals(null)) {
                 ListAdapter adapter = new SimpleAdapter(MainActivity.this, bookList,
-                        R.layout.list_item, new String[]{"title", "description", "authors"},
+                        R.layout.list_item, new String[]{getString(R.string.title),
+                        getString(R.string.description), getString(R.string.authors)},
                         new int[]{R.id.title, R.id.description, R.id.authors});
                 listView.setAdapter(adapter);
             } else {
