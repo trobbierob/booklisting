@@ -14,4 +14,5 @@
     <string name="authors">authors</string>
     <string name="description">description</string>
     <string name="test">description</string>
+    <string name="empty_tv">Oh no! You have no books! Enter a keyword above, and tap the SEARCH button to find something interesting.</string>
 </resources>
