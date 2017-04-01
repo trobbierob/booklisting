@@ -23,11 +23,14 @@ public class NetworkUtils {
 
     final static String PARAM_RESULT_NUM = "5";
 
+
     public static URL buildURL(String bookSearchQuery) {
         Uri builtUri = Uri.parse(GOOGLE_BOOKS_URL).buildUpon()
                 .appendQueryParameter(PARAM_QUERY, bookSearchQuery)
                 .appendQueryParameter(PARAM_RESULTS, PARAM_RESULT_NUM)
                 .build();
+
+
 
         URL url = null;
         try {

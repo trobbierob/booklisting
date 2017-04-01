@@ -159,10 +159,12 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void result) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
             if (!bookList.equals(null)) {
+                Log.v(TAG, "bookList is: " + bookList);
                 ListAdapter adapter = new SimpleAdapter(MainActivity.this, bookList,
                         R.layout.list_item, new String[]{getString(R.string.title),
                         getString(R.string.description), getString(R.string.authors)},
                         new int[]{R.id.title, R.id.description, R.id.authors});
+                Log.v(TAG, "listview is: " + listView);
                 listView.setAdapter(adapter);
             } else {
                 listView.setEmptyView(findViewById(R.id.empty));
